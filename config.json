@@ -1,0 +1,23 @@
+{
+  "network": {
+    "timeout": 30,
+    "keepAlive": 30,
+    "maxConnectionsPerHost": 0,
+    "maxIdleConns": 2000,
+    "maxIdleConnsPerHost": 200,
+    "idleConnectionTimeout": 10,
+    "TLSHandshakeTimeout": 30,
+    "TLSInsecureSkipVerify": true
+  },
+  "common": {
+    "listenPort": 8000
+  },
+  "routes": [
+    {
+      "domain": "localhost",
+      "targets": [
+        "http://httpbin.org"
+      ]
+    }
+  ]
+}
