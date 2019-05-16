@@ -1,9 +1,8 @@
-package providers
+package config
 
 import (
 	"crypto/tls"
 	"encoding/json"
-	"github.com/jisuskraist/JAProxy/structs"
 	"net"
 	"net/http"
 	"os"
@@ -13,8 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-
-type jsonProvider struct {
+type JSONProvider struct {
 	Network struct {
 		Timeout               time.Duration `json:"timeout"`
 		KeepAlive             time.Duration `json:"keepAlive"`
@@ -28,11 +26,12 @@ type jsonProvider struct {
 	Common struct {
 		ListenPort int `json:"listenPort"`
 	} `json:"common"`
-	Routes []structs.RouteMapping `json:"routes"`
+	Routes []RouteMapping `json:"routes"`
 }
+
 //NewJSONProvider returns a new JSON provider for configuration.
-func NewJSONProvider(path string) *jsonProvider {
-	var config jsonProvider
+func NewJSONProvider(path string) *JSONProvider {
+	var config JSONProvider
 
 	pwd, _ := os.Getwd()
 	joinedPath := filepath.Join(pwd, path)
@@ -55,15 +54,15 @@ func NewJSONProvider(path string) *jsonProvider {
 	return &config
 }
 
-func (p jsonProvider) LoadCommon(config *structs.Config) {
+func (p JSONProvider) LoadCommon(config *Config) {
 	config.Port = p.Common.ListenPort
 }
 
-func (p jsonProvider) LoadRoutes(config *structs.Config) {
+func (p JSONProvider) LoadRoutes(config *Config) {
 	config.Routes = p.Routes
 }
 
-func (p jsonProvider) LoadNetwork(config *structs.Config) {
+func (p JSONProvider) LoadNetwork(config *Config) {
 	transport := &http.Transport{
 		DialContext: (&net.Dialer{
 			Timeout:   p.Network.Timeout * time.Second,

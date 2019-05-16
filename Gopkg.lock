@@ -18,27 +18,16 @@
   version = "v1.4.1"
 
 [[projects]]
-  digest = "1:d41801ce88291c10b2ab9115f7b7d1836c81b910e2d89d600bba436ff7bbaa41"
-  name = "github.com/snail007/goproxy"
-  packages = ["services"]
-  pruneopts = "UT"
-  revision = "71d9f99970e839b95802753eb2830bd2d74224bf"
-  version = "v7.4"
-
-[[projects]]
   branch = "master"
   digest = "1:3851a6d548ec5a808e396408f03a30b8d05ef4426db7ad8688f639b2d88b47bd"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "87c872767d25fb96dfe96c794fd028b38a08440b"
+  revision = "61b9204099cb1bebc803c9ffb9b2d3acd9d457d9"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = [
-    "github.com/sirupsen/logrus",
-    "github.com/snail007/goproxy/services"
-  ]
+  input-imports = ["github.com/sirupsen/logrus"]
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -1,6 +1,15 @@
-package structs
+package config
 
-import "net/http"
+import (
+	"errors"
+	"net/http"
+)
+
+type Type int
+
+const (
+	JSON Type = iota
+)
 
 //ConfigurationProvider defines an interface to be
 //implemented by all the configurations providers.
@@ -9,6 +18,15 @@ type ConfigurationProvider interface {
 	LoadCommon(config *Config)
 	LoadRoutes(config *Config)
 	LoadNetwork(config *Config)
+}
+
+func NewProvider(t Type) (ConfigurationProvider, error) {
+	switch t {
+	case JSON:
+		return NewJSONProvider("config.json"), nil
+	default:
+		return nil, errors.New("provider not defined")
+	}
 }
 
 //RouteMapping represents a mapping of a domain with it's targets destinations.
