@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+const JsonFile = "config.json"
+
 type Type int
 
 const (
@@ -13,7 +15,8 @@ const (
 
 //ConfigurationProvider defines an interface to be
 //implemented by all the configurations providers.
-//This enables to have many configuration providers such as files, consul, etc.
+//This enables to have many configuration providers such as
+//files or consul and make them load specific parts of the configuration
 type ConfigurationProvider interface {
 	LoadCommon(config *Config)
 	LoadRoutes(config *Config)
@@ -23,7 +26,7 @@ type ConfigurationProvider interface {
 func NewProvider(t Type) (ConfigurationProvider, error) {
 	switch t {
 	case JSON:
-		return NewJSONProvider("config.json"), nil
+		return NewJSONProvider(JsonFile), nil
 	default:
 		return nil, errors.New("provider not defined")
 	}

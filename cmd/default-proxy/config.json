@@ -14,9 +14,9 @@
   },
   "routes": [
     {
-      "domain": "localhost",
+      "domain": "localhost:8000",
       "targets": [
-        "http://httpbin.org"
+        "https://api.mercadolibre.com"
       ]
     }
   ]

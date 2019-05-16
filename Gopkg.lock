@@ -2,12 +2,44 @@
 
 
 [[projects]]
+  digest = "1:114ecad51af93a73ae6781fd0d0bc28e52b433c852b84ab4b4c109c15e6c6b6d"
+  name = "github.com/jroimartin/gocui"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "c055c87ae801372cd74a0839b972db4f7697ae5f"
+  version = "v0.4.0"
+
+[[projects]]
   digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
   pruneopts = "UT"
   revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
   version = "v1.0.2"
+
+[[projects]]
+  digest = "1:0356f3312c9bd1cbeda81505b7fd437501d8e778ab66998ef69f00d7f9b3a0d7"
+  name = "github.com/mattn/go-runewidth"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3ee7d812e62a0804a7d0a324e0249ca2db3476d3"
+  version = "v0.0.4"
+
+[[projects]]
+  branch = "master"
+  digest = "1:e4f1b6b3c33388b1f6f3d630280d9b0870c1e2f80379dfd2f89dd06425e9e6b9"
+  name = "github.com/nsf/termbox-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "288510b9734e30e7966ec2f22b87c5f8e67345e3"
+
+[[projects]]
+  digest = "1:7233f2b1f864831a729ca0d48e84081ac8b4ce040a5aad3b394c421a7a0405cb"
+  name = "github.com/paulbellamy/ratecounter"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "524851a93235ac051e3540563ed7909357fe24ab"
+  version = "v0.2.0"
 
 [[projects]]
   digest = "1:fd61cf4ae1953d55df708acb6b91492d538f49c305b364a014049914495db426"
@@ -28,6 +60,10 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/sirupsen/logrus"]
+  input-imports = [
+    "github.com/jroimartin/gocui",
+    "github.com/paulbellamy/ratecounter",
+    "github.com/sirupsen/logrus"
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -2,7 +2,8 @@ package services
 
 import (
 	"fmt"
-	"github.com/jisuskraist/JAProxy/pkg/config"
+	"github.com/jisuskraist/JAProxy/pkg/balancing"
+	"github.com/jisuskraist/JAProxy/pkg/metrics"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
@@ -14,28 +15,34 @@ type resHandler func(res *http.Response)
 
 //HTTPProxy represents an http proxy service.
 type HTTPProxy struct {
-	cfg         config.Config
+	balancer    balancing.Balancer
+	netClient   *http.Client
 	reqHandlers []reqHandler
 	resHandler  []resHandler
 }
 
 // Handles the request made to the web server.
 func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	metrics.RpsCounter.Incr(1)
+
 	p.requestMiddleware(req)
 
-	//TODO: add a strategy to the target pick, implement a pool of services maybe?
-	targetURL, err := url.Parse(p.cfg.Routes[0].Targets[0])
+	targetURL, err := p.balancer.NextTarget(req.Host)
+
 	if err != nil {
-		log.Fatal(err)
+		log.Warn(err)
+		rw.WriteHeader(http.StatusBadGateway)
+		fmt.Fprint(rw, err)
+		return
 	}
 
 	//Overwrite host, scheme and requestUri of proxied request
 	overwriteRequest(req, *targetURL)
 	//This could be synced to use less file descriptors if needed
-	resp, err := p.cfg.Network.NetClient.Do(req)
+	resp, err := p.netClient.Do(req)
 	//If there was an error making the request, return 500 with err as body
 	if err != nil {
-		log.Error("An error occurred while sending request " , err)
+		log.Error("An error occurred while sending request ", err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(rw, err)
 		return
@@ -108,9 +115,10 @@ func (p *HTTPProxy) OnResponse(fn func(r *http.Response)) {
 	p.resHandler = append(p.resHandler, fn)
 }
 
-func NewHTTPProxy(cfg config.Config) *HTTPProxy {
+func NewHTTPProxy(n *http.Client, b balancing.Balancer) *HTTPProxy {
 	proxy := &HTTPProxy{
-		cfg: cfg,
+		netClient: n,
+		balancer:  b,
 	}
 
 	return proxy
