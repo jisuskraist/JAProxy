@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/jisuskraist/JAProxy/pkg/balancing"
 	"github.com/jisuskraist/JAProxy/pkg/config"
-	"github.com/jisuskraist/JAProxy/pkg/services"
+	"github.com/jisuskraist/JAProxy/pkg/network"
+	"github.com/jisuskraist/JAProxy/pkg/proxies"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
@@ -23,7 +23,7 @@ func main() {
 	conf.LoadNetwork(prov)
 	conf.LoadRoutes(prov)
 
-	proxy := services.NewHTTPProxy(conf.Network.NetClient, balancing.NewBalanceStrategy(balancing.RoundRobin, conf.Routes))
+	proxy := proxies.NewHTTPProxy(conf.Client, network.NewBalancer(network.RoundRobin, conf.Routes))
 
 	proxy.OnRequest(func(req *http.Request) {
 		log.Debug(req.URL)

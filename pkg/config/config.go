@@ -2,7 +2,7 @@ package config
 
 import (
 	"errors"
-	"net/http"
+	"github.com/jisuskraist/JAProxy/pkg/network"
 )
 
 const JsonFile = "config.json"
@@ -32,23 +32,11 @@ func NewProvider(t Type) (ConfigurationProvider, error) {
 	}
 }
 
-//RouteMapping represents a mapping of a domain with it's targets destinations.
-//There could be one or more targets.
-type RouteMapping struct {
-	Domain  string
-	Targets []string
-}
-
-//Network represents the network configuration and the needed structs.
-type Network struct {
-	NetClient *http.Client
-}
-
 //Config hold the configuration of an application such as routes, listen port, network configuration.
 type Config struct {
-	Routes  []RouteMapping
-	Port    int
-	Network Network
+	Port   int
+	Routes []network.RouteMapping
+	Client network.Client
 }
 
 func (c *Config) LoadCommon(provider ConfigurationProvider) {

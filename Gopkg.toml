@@ -37,6 +37,3 @@
   name = "github.com/paulbellamy/ratecounter"
   version = "0.2.0"
 
-[[constraint]]
-  name = "github.com/jroimartin/gocui"
-  version = "0.4.0"

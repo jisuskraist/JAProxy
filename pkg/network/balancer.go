@@ -1,7 +1,6 @@
-package balancing
+package network
 
 import (
-	"github.com/jisuskraist/JAProxy/pkg/config"
 	"net/url"
 )
 
@@ -15,7 +14,7 @@ type Balancer interface {
 	NextTarget(host string) (*url.URL, error)
 }
 
-func NewBalanceStrategy(s Strategy, routes []config.RouteMapping) Balancer {
+func NewBalancer(s Strategy, routes []RouteMapping) Balancer {
 	switch s {
 	case RoundRobin:
 		return newRobinWood(routes)

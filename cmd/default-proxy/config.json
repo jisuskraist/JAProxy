@@ -16,7 +16,7 @@
     {
       "domain": "localhost:8000",
       "targets": [
-        "https://api.mercadolibre.com"
+      	"http://localhost:8080"
       ]
     }
   ]

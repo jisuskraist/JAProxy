@@ -1,22 +1,22 @@
-package balancing
+package network
 
 import (
 	"errors"
-	"github.com/jisuskraist/JAProxy/pkg/config"
 	"net/url"
 	"sync"
 )
-
+// RobinWood is a simple round robin
 type RobinWood struct {
 	counter int
 	l       *sync.Mutex
-	routes  []config.RouteMapping
+	routes  []RouteMapping
 }
 
 func (rw *RobinWood) NextTarget(host string) (*url.URL, error) {
 	rw.l.Lock()
 	defer rw.l.Unlock()
 
+	//TODO: make target iteration domain specific, currently counter shared by domains
 	for _, r := range rw.routes {
 		if r.Domain == host {
 			rw.counter = (rw.counter + 1) % len(r.Targets)
@@ -26,7 +26,7 @@ func (rw *RobinWood) NextTarget(host string) (*url.URL, error) {
 	return nil, errors.New("couldn't find a host to map")
 }
 
-func newRobinWood(routes []config.RouteMapping) *RobinWood {
+func newRobinWood(routes []RouteMapping) *RobinWood {
 	return &RobinWood{
 		routes:  routes,
 		counter: 0,

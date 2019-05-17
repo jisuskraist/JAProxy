@@ -1,9 +1,9 @@
-package services
+package proxies
 
 import (
 	"fmt"
-	"github.com/jisuskraist/JAProxy/pkg/balancing"
 	"github.com/jisuskraist/JAProxy/pkg/metrics"
+	"github.com/jisuskraist/JAProxy/pkg/network"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
@@ -15,8 +15,8 @@ type resHandler func(res *http.Response)
 
 //HTTPProxy represents an http proxy service.
 type HTTPProxy struct {
-	balancer    balancing.Balancer
-	netClient   *http.Client
+	balancer    network.Balancer
+	netClient   network.Client
 	reqHandlers []reqHandler
 	resHandler  []resHandler
 }
@@ -48,17 +48,18 @@ func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 	p.responseMiddleware(resp)
-	//Copying headers from response
 	copyHeaders(rw.Header(), resp.Header, false)
+	copyCookies(rw.Header(), resp.Cookies())
 	//Set status code and copy bodies
 	rw.WriteHeader(resp.StatusCode)
-	_, err = io.Copy(rw, resp.Body)
-
-	if err != nil {
-		log.Error("An error occurred while copying response from server %s", err.Error())
+	if resp.Body != nil {
+		_, err = io.Copy(rw, resp.Body)
+		if err != nil {
+			log.Error("An error occurred while copying response from server %s", err.Error())
+		}
 	}
 
-	//Close body to avoid leak and enable TCP connection reuse
+	//Close body to avoid leak and enable TCP connection reuse (in case of using golang net client)
 	err = resp.Body.Close()
 	if err != nil {
 		log.Error("An error occurred while closing the response body %s", err.Error())
@@ -85,6 +86,12 @@ func copyHeaders(dst, src http.Header, keepDestHeaders bool) {
 		for _, value := range values {
 			dst.Set(key, value)
 		}
+	}
+}
+
+func copyCookies(dst http.Header, src []*http.Cookie) {
+	for _, c := range src {
+		dst.Add("Set-Cookie", c.Raw)
 	}
 }
 
@@ -115,7 +122,7 @@ func (p *HTTPProxy) OnResponse(fn func(r *http.Response)) {
 	p.resHandler = append(p.resHandler, fn)
 }
 
-func NewHTTPProxy(n *http.Client, b balancing.Balancer) *HTTPProxy {
+func NewHTTPProxy(n network.Client, b network.Balancer) *HTTPProxy {
 	proxy := &HTTPProxy{
 		netClient: n,
 		balancer:  b,

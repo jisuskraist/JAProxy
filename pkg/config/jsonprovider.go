@@ -3,6 +3,7 @@ package config
 import (
 	"crypto/tls"
 	"encoding/json"
+	"github.com/jisuskraist/JAProxy/pkg/network"
 	"net"
 	"net/http"
 	"os"
@@ -26,7 +27,7 @@ type JSONProvider struct {
 	Common struct {
 		ListenPort int `json:"listenPort"`
 	} `json:"common"`
-	Routes []RouteMapping `json:"routes"`
+	Routes []network.RouteMapping `json:"routes"`
 }
 
 //NewJSONProvider returns a new JSON provider for configuration.
@@ -81,5 +82,5 @@ func (p JSONProvider) LoadNetwork(config *Config) {
 		Timeout:   p.Network.Timeout * time.Second,
 	}
 
-	config.Network.NetClient = client
+	config.Client = client
 }
