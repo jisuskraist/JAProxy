@@ -12,6 +12,7 @@ type RobinWood struct {
 	routes  []RouteMapping
 }
 
+// NextTarget returns the next target in host lists according to the current iteration of the RR
 func (rw *RobinWood) NextTarget(host string) (*url.URL, error) {
 	rw.l.Lock()
 	defer rw.l.Unlock()

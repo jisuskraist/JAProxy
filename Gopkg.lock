@@ -38,7 +38,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/paulbellamy/ratecounter",
-    "github.com/sirupsen/logrus"
+    "github.com/sirupsen/logrus",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -117,7 +117,7 @@ func (p *HTTPProxy) OnRequest(fn func(r *http.Request)) {
 }
 
 // Adds a callback for the response object. BEWARE! since this is a pointer
-// some manipulation can broke the response further down the chain.
+// some manipulation can broke the response further down the stream.
 func (p *HTTPProxy) OnResponse(fn func(r *http.Response)) {
 	p.resHandler = append(p.resHandler, fn)
 }
