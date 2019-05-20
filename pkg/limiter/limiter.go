@@ -7,6 +7,12 @@ import (
 )
 
 type StorageType int
+type Type int
+
+const (
+	IpAddress = iota
+	URL
+)
 
 const (
 	InMemory = iota
@@ -21,15 +27,15 @@ type client struct {
 type Limiter interface {
 	CleanUp()
 	Limit(next http.Handler) http.Handler
-	addClient(ip string) *rate.Limiter
-	getClient(ip string) *rate.Limiter
+	addLimiter(t Type, v string) *rate.Limiter
+	getLimiter(t Type, v string) *rate.Limiter
 }
 
-func NewLimiter(s StorageType, limit, burst int, age, sweepInterval time.Duration) Limiter {
+func NewLimiter(s StorageType, ipLimit, pathLimit, burst int, age, sweepInterval time.Duration) Limiter {
 	switch s {
 	case InMemory:
 		fallthrough
 	default:
-		return NewMemLimiter(limit, burst, age, sweepInterval)
+		return NewMemLimiter(ipLimit, pathLimit, burst, age, sweepInterval)
 	}
 }

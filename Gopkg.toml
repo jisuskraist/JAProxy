@@ -36,3 +36,7 @@
 [[constraint]]
   name = "github.com/paulbellamy/ratecounter"
   version = "0.2.0"
+
+[[constraint]]
+  name = "github.com/prometheus/client_golang"
+  version = "0.9.3"

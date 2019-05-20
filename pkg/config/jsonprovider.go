@@ -27,7 +27,8 @@ type JSONProvider struct {
 	Common struct {
 		ListenPort int `json:"listenPort"`
 	} `json:"common"`
-	Routes []balance.RouteMapping `json:"routes"`
+	Routes  []balance.RouteMapping `json:"routes"`
+	Limiter LimiterConfig          `json:"limiter"`
 }
 
 //NewJSONProvider returns a new JSON provider for configuration.
@@ -83,4 +84,5 @@ func (p JSONProvider) LoadNetwork(config *Config) {
 	}
 
 	config.Client = client
+	config.Limiter = p.Limiter
 }

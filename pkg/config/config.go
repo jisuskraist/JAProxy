@@ -4,9 +4,10 @@ import (
 	"errors"
 	"github.com/jisuskraist/JAProxy/pkg/balance"
 	"github.com/jisuskraist/JAProxy/pkg/network"
+	"time"
 )
 
-const JsonFile = "config.json"
+const JsonFile = "/app/config/config.json"
 
 type Type int
 
@@ -24,6 +25,14 @@ type ConfigurationProvider interface {
 	LoadNetwork(config *Config)
 }
 
+type LimiterConfig struct {
+	IpLimit       int           `json:"ipLimit"`
+	PathLimit     int           `json:"pathLimit"`
+	Burst         int           `json:"burst"`
+	Age           time.Duration `json:"age"`
+	SweepInterval time.Duration `json:"sweepInterval"`
+}
+
 func NewProvider(t Type) (ConfigurationProvider, error) {
 	switch t {
 	case JSON:
@@ -35,9 +44,10 @@ func NewProvider(t Type) (ConfigurationProvider, error) {
 
 //Config hold the configuration of an application such as routes, listen port, network configuration.
 type Config struct {
-	Port   int
-	Routes []balance.RouteMapping
-	Client network.Client
+	Port    int
+	Routes  []balance.RouteMapping
+	Client  network.Client
+	Limiter LimiterConfig
 }
 
 func (c *Config) LoadCommon(provider ConfigurationProvider) {

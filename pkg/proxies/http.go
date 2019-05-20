@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type reqHandler func(req *http.Request)
@@ -18,12 +19,15 @@ type resHandler func(res *http.Response)
 type HTTPProxy struct {
 	balancer    balance.Balancer
 	netClient   network.Client
+	registry    *metrics.Registry
 	reqHandlers []reqHandler
 	resHandler  []resHandler
 }
 
 // Handles the request made to the web server.
 func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	start := time.Now()
+	mStatus := http.StatusOK
 	metrics.RpsCounter.Incr(1)
 
 	p.requestMiddleware(req)
@@ -33,6 +37,8 @@ func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Warn(err)
 		rw.WriteHeader(http.StatusBadGateway)
+		duration := time.Since(start)
+		p.registry.Histogram.WithLabelValues(fmt.Sprintf("%d", http.StatusInternalServerError)).Observe(duration.Seconds())
 		fmt.Fprint(rw, err)
 		return
 	}
@@ -46,6 +52,8 @@ func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		log.Error("An error occurred while sending request ", err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(rw, err)
+		duration := time.Since(start)
+		p.registry.Histogram.WithLabelValues(fmt.Sprintf("%d", http.StatusInternalServerError)).Observe(duration.Seconds())
 		return
 	}
 	p.responseMiddleware(resp)
@@ -57,6 +65,7 @@ func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		_, err = io.Copy(rw, resp.Body)
 		if err != nil {
 			log.Error("An error occurred while copying response from server %s", err.Error())
+			mStatus = http.StatusInternalServerError
 		}
 	}
 
@@ -64,7 +73,10 @@ func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	err = resp.Body.Close()
 	if err != nil {
 		log.Error("An error occurred while closing the response body %s", err.Error())
+		mStatus = http.StatusInternalServerError
 	}
+	duration := time.Since(start)
+	p.registry.Histogram.WithLabelValues(fmt.Sprintf("%d", mStatus)).Observe(duration.Seconds())
 }
 
 // Overwrites the request data to acts on its behalf prior to send it to the target server
@@ -123,10 +135,11 @@ func (p *HTTPProxy) OnResponse(fn func(r *http.Response)) {
 	p.resHandler = append(p.resHandler, fn)
 }
 
-func NewHTTPProxy(n network.Client, b balance.Balancer) *HTTPProxy {
+func NewHTTPProxy(n network.Client, b balance.Balancer, r *metrics.Registry) *HTTPProxy {
 	proxy := &HTTPProxy{
 		netClient: n,
 		balancer:  b,
+		registry:  r,
 	}
 
 	return proxy

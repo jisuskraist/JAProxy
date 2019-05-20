@@ -12,9 +12,22 @@
   "common": {
     "listenPort": 8000
   },
+  "limiter": {
+    "ipLimit": 1000,
+    "pathLimit": 200,
+    "burst": 3000,
+    "age": 30,
+    "sweepInterval": 180
+  },
   "routes": [
     {
-      "domain": "localhost:8000",
+      "domain": "ml.eternalblue.dev",
+      "targets": [
+        "https://api.mercadolibre.com"
+      ]
+    },
+    {
+      "domain": "httpbin.eternalblue.dev",
       "targets": [
         "https://httpbin.org"
       ]
