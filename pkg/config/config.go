@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"github.com/jisuskraist/JAProxy/pkg/balance"
 	"github.com/jisuskraist/JAProxy/pkg/network"
 )
 
@@ -35,7 +36,7 @@ func NewProvider(t Type) (ConfigurationProvider, error) {
 //Config hold the configuration of an application such as routes, listen port, network configuration.
 type Config struct {
 	Port   int
-	Routes []network.RouteMapping
+	Routes []balance.RouteMapping
 	Client network.Client
 }
 

@@ -3,7 +3,7 @@ package config
 import (
 	"crypto/tls"
 	"encoding/json"
-	"github.com/jisuskraist/JAProxy/pkg/network"
+	"github.com/jisuskraist/JAProxy/pkg/balance"
 	"net"
 	"net/http"
 	"os"
@@ -27,7 +27,7 @@ type JSONProvider struct {
 	Common struct {
 		ListenPort int `json:"listenPort"`
 	} `json:"common"`
-	Routes []network.RouteMapping `json:"routes"`
+	Routes []balance.RouteMapping `json:"routes"`
 }
 
 //NewJSONProvider returns a new JSON provider for configuration.

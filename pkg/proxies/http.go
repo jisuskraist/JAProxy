@@ -2,6 +2,7 @@ package proxies
 
 import (
 	"fmt"
+	"github.com/jisuskraist/JAProxy/pkg/balance"
 	"github.com/jisuskraist/JAProxy/pkg/metrics"
 	"github.com/jisuskraist/JAProxy/pkg/network"
 	log "github.com/sirupsen/logrus"
@@ -15,7 +16,7 @@ type resHandler func(res *http.Response)
 
 //HTTPProxy represents an http proxy service.
 type HTTPProxy struct {
-	balancer    network.Balancer
+	balancer    balance.Balancer
 	netClient   network.Client
 	reqHandlers []reqHandler
 	resHandler  []resHandler
@@ -48,7 +49,7 @@ func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 	p.responseMiddleware(resp)
-	copyHeaders(rw.Header(), resp.Header, false)
+	copyHeaders(rw.Header(), resp.Header, true)
 	copyCookies(rw.Header(), resp.Cookies())
 	//Set status code and copy bodies
 	rw.WriteHeader(resp.StatusCode)
@@ -122,7 +123,7 @@ func (p *HTTPProxy) OnResponse(fn func(r *http.Response)) {
 	p.resHandler = append(p.resHandler, fn)
 }
 
-func NewHTTPProxy(n network.Client, b network.Balancer) *HTTPProxy {
+func NewHTTPProxy(n network.Client, b balance.Balancer) *HTTPProxy {
 	proxy := &HTTPProxy{
 		netClient: n,
 		balancer:  b,

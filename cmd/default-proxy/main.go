@@ -1,8 +1,9 @@
 package main
 
 import (
+	"github.com/jisuskraist/JAProxy/pkg/balance"
 	"github.com/jisuskraist/JAProxy/pkg/config"
-	"github.com/jisuskraist/JAProxy/pkg/network"
+	"github.com/jisuskraist/JAProxy/pkg/limiter"
 	"github.com/jisuskraist/JAProxy/pkg/proxies"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -23,7 +24,10 @@ func main() {
 	conf.LoadNetwork(prov)
 	conf.LoadRoutes(prov)
 
-	proxy := proxies.NewHTTPProxy(conf.Client, network.NewBalancer(network.RoundRobin, conf.Routes))
+	l := limiter.NewLimiter(limiter.InMemory, 3, 5, 60, 180)
+	go l.CleanUp()
+
+	proxy := proxies.NewHTTPProxy(conf.Client, balance.NewBalancer(balance.RoundRobin, conf.Routes))
 
 	proxy.OnRequest(func(req *http.Request) {
 		log.Debug(req.URL)
@@ -38,5 +42,5 @@ func main() {
 	})
 	handler.HandleFunc("/", proxy.ServeHTTP)
 
-	http.ListenAndServe(":"+strconv.Itoa(conf.Port), handler)
+	http.ListenAndServe(":"+strconv.Itoa(conf.Port), l.Limit(handler))
 }

@@ -1,10 +1,11 @@
-package network
+package balance
 
 import (
 	"errors"
 	"net/url"
 	"sync"
 )
+
 // RobinWood is a simple round robin
 type RobinWood struct {
 	counter int
@@ -14,6 +15,7 @@ type RobinWood struct {
 
 // NextTarget returns the next target in host lists according to the current iteration of the RR
 func (rw *RobinWood) NextTarget(host string) (*url.URL, error) {
+	// lock to avoid requests getting same target twice
 	rw.l.Lock()
 	defer rw.l.Unlock()
 

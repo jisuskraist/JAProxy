@@ -1,4 +1,4 @@
-package network
+package balance
 
 import (
 	"net/url"

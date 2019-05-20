@@ -16,7 +16,7 @@
     {
       "domain": "localhost:8000",
       "targets": [
-        "http://ec2-52-23-160-75.compute-1.amazonaws.com"
+        "https://httpbin.org"
       ]
     }
   ]
