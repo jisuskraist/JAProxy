@@ -26,8 +26,8 @@ type ConfigurationProvider interface {
 }
 
 type LimiterConfig struct {
-	IpLimit       int           `json:"ipLimit"`
-	PathLimit     int           `json:"pathLimit"`
+	IpLimit       int64         `json:"ipLimit"`
+	PathLimit     int64         `json:"pathLimit"`
 	Burst         int           `json:"burst"`
 	Age           time.Duration `json:"age"`
 	SweepInterval time.Duration `json:"sweepInterval"`

@@ -33,7 +33,7 @@ func main() {
 	r := metrics.NewRegistry()
 	prometheus.Register(r.Histogram)
 	// Limiter
-	l := limiter.NewLimiter(limiter.InMemory, conf.Limiter.IpLimit, conf.Limiter.PathLimit, conf.Limiter.Burst, conf.Limiter.Age, conf.Limiter.SweepInterval)
+	l := limiter.NewLimiter(limiter.Redis, conf.Limiter)
 	go l.CleanUp()
 	// Proxy
 	proxy := proxies.NewHTTPProxy(conf.Client, balance.NewBalancer(balance.RoundRobin, conf.Routes), r)

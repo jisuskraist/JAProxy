@@ -10,6 +10,30 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:c950e574951c7199fb3d990d0e7a61996f40f8e646ba7cf8a557878d4c737f53"
+  name = "github.com/go-redis/redis"
+  packages = [
+    ".",
+    "internal",
+    "internal/consistenthash",
+    "internal/hashtag",
+    "internal/pool",
+    "internal/proto",
+    "internal/util"
+  ]
+  pruneopts = "UT"
+  revision = "75795aa4236dc7341eefac3bbe945e68c99ef9df"
+  version = "v6.15.3"
+
+[[projects]]
+  digest = "1:2ea8f8273a5f766f9d6f8d8d28949dd505a0d56377a5a2b0d986a991a9aa98ff"
+  name = "github.com/go-redis/redis_rate"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "31124b3ea0f4403d26bb09997338e5c78828cf99"
+  version = "v6.5.0"
+
+[[projects]]
   digest = "1:318f1c959a8a740366fce4b1e1eb2fd914036b4af58fbd0a003349b305f118ad"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
@@ -47,7 +71,7 @@
   packages = [
     "prometheus",
     "prometheus/internal",
-    "prometheus/promhttp",
+    "prometheus/promhttp"
   ]
   pruneopts = "UT"
   revision = "50c4339db732beb2165735d2cde0bff78eb3c5a5"
@@ -67,7 +91,7 @@
   packages = [
     "expfmt",
     "internal/bitbucket.org/ww/goautoneg",
-    "model",
+    "model"
   ]
   pruneopts = "UT"
   revision = "1ba88736f028e37bc17328369e94a537ae9e0234"
@@ -79,7 +103,7 @@
   name = "github.com/prometheus/procfs"
   packages = [
     ".",
-    "internal/fs",
+    "internal/fs"
   ]
   pruneopts = "UT"
   revision = "9935e8e0588d26307d1d4a07bed7bd47271b6bbd"
@@ -112,10 +136,13 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/go-redis/redis",
+    "github.com/go-redis/redis_rate",
     "github.com/paulbellamy/ratecounter",
+    "github.com/prometheus/client_golang/prometheus",
     "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/sirupsen/logrus",
-    "golang.org/x/time/rate",
+    "golang.org/x/time/rate"
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
