@@ -1,0 +1,36 @@
+{
+  "network": {
+    "timeout": 30,
+    "keepAlive": 30,
+    "maxConnectionsPerHost": 0,
+    "maxIdleConns": 2000,
+    "maxIdleConnsPerHost": 200,
+    "idleConnectionTimeout": 10,
+    "TLSHandshakeTimeout": 30,
+    "TLSInsecureSkipVerify": true
+  },
+  "common": {
+    "listenPort": 8000
+  },
+  "limiter": {
+    "ipLimit": 1000,
+    "pathLimit": 200,
+    "burst": 3000,
+    "age": 30,
+    "sweepInterval": 180
+  },
+  "routes": [
+    {
+      "domain": "ml.eternalblue.dev",
+      "targets": [
+        "https://api.mercadolibre.com"
+      ]
+    },
+    {
+      "domain": "httpbin.eternalblue.dev",
+      "targets": [
+        "https://httpbin.org"
+      ]
+    }
+  ]
+}
