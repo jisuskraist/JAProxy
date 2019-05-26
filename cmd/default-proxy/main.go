@@ -18,7 +18,7 @@ func main() {
 	log.Info("Starting app")
 
 	// Configuration
-	prov, err := config.NewProvider(config.JSON)
+	prov, err := config.NewProvider(config.Consul)
 	if err != nil {
 		panic(err)
 	}

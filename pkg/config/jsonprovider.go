@@ -86,3 +86,7 @@ func (p JSONProvider) LoadNetwork(config *Config) {
 	config.Client = client
 	config.Limiter = p.Limiter
 }
+
+func (p JSONProvider) LoadAll(config *Config) {
+	config.Port = p.Common.ListenPort
+}

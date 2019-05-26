@@ -41,5 +41,5 @@ func NewLimiter(s StorageType, cfg config.LimiterConfig) Limiter {
 		fallthrough
 	default:
 		return NewMemLimiter(cfg)
-	}
+}
 }

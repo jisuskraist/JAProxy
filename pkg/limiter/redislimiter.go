@@ -23,7 +23,7 @@ type redisConfig struct {
 func (rl RedisLimiter) Limit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ip, _, _ := net.SplitHostPort(r.RemoteAddr)
-		rate, _, allowed := rl.limiter.Allow(ip, int64(rl.cfg.IpLimit), time.Minute)
+		rate, _, allowed := rl.limiter.Allow(ip, int64(rl.cfg.IpLimit), time.Second)
 		if !allowed {
 			h := w.Header()
 			h.Set("X-RateLimit-Limit", string(rl.cfg.IpLimit))
@@ -43,9 +43,10 @@ func NewRedisLimiter(cfg redisConfig) *RedisLimiter {
 	r := redis.NewRing(&redis.RingOptions{
 		Addrs: cfg.Servers,
 	})
-	
+
 	return &RedisLimiter{
 		ring:    r,
 		limiter: redis_rate.NewLimiter(r),
+		cfg:     cfg,
 	}
 }
