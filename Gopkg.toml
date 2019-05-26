@@ -40,3 +40,15 @@
 [[constraint]]
   name = "github.com/prometheus/client_golang"
   version = "0.9.3"
+
+[[constraint]]
+  name = "github.com/go-redis/redis"
+  version = "6.15.3"
+
+[[constraint]]
+  name = "github.com/go-redis/redis_rate"
+  version = "6.5.0"
+
+[[constraint]]
+  name = "github.com/hashicorp/consul"
+  version = "1.5.1"

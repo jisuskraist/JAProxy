@@ -1,6 +1,7 @@
 package limiter
 
 import (
+	"github.com/jisuskraist/JAProxy/pkg/config"
 	"golang.org/x/time/rate"
 	"net/http"
 	"time"
@@ -27,15 +28,18 @@ type client struct {
 type Limiter interface {
 	CleanUp()
 	Limit(next http.Handler) http.Handler
-	addLimiter(t Type, v string) *rate.Limiter
-	getLimiter(t Type, v string) *rate.Limiter
 }
 
-func NewLimiter(s StorageType, ipLimit, pathLimit, burst int, age, sweepInterval time.Duration) Limiter {
+func NewLimiter(s StorageType, cfg config.LimiterConfig) Limiter {
 	switch s {
+	case Redis:
+		servers := map[string]string{
+			"server1": "localhost:6379",
+		}
+		return NewRedisLimiter(redisConfig{cfg, servers})
 	case InMemory:
 		fallthrough
 	default:
-		return NewMemLimiter(ipLimit, pathLimit, burst, age, sweepInterval)
-	}
+		return NewMemLimiter(cfg)
+}
 }

@@ -1,6 +1,7 @@
 package limiter
 
 import (
+	"github.com/jisuskraist/JAProxy/pkg/config"
 	"golang.org/x/time/rate"
 	"net"
 	"net/http"
@@ -86,13 +87,13 @@ func (m *MemLimiter) CleanUp() {
 	}
 }
 
-func NewMemLimiter(ipLimit, pathLimit, burst int, age, sweepInterval time.Duration) *MemLimiter {
+func NewMemLimiter(cfg config.LimiterConfig) *MemLimiter {
 	l := &MemLimiter{
-		rate.Limit(ipLimit),
-		rate.Limit(pathLimit),
-		burst,
-		age,
-		sweepInterval,
+		rate.Limit(cfg.IpLimit),
+		rate.Limit(cfg.PathLimit),
+		cfg.Burst,
+		cfg.Age,
+		cfg.SweepInterval,
 		make(map[Type]map[string]*client),
 		sync.Mutex{},
 	}

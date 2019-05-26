@@ -13,6 +13,7 @@ type Type int
 
 const (
 	JSON Type = iota
+	Consul
 )
 
 //ConfigurationProvider defines an interface to be
@@ -23,11 +24,12 @@ type ConfigurationProvider interface {
 	LoadCommon(config *Config)
 	LoadRoutes(config *Config)
 	LoadNetwork(config *Config)
+	LoadAll(config *Config)
 }
 
 type LimiterConfig struct {
-	IpLimit       int           `json:"ipLimit"`
-	PathLimit     int           `json:"pathLimit"`
+	IpLimit       int64         `json:"ipLimit"`
+	PathLimit     int64         `json:"pathLimit"`
 	Burst         int           `json:"burst"`
 	Age           time.Duration `json:"age"`
 	SweepInterval time.Duration `json:"sweepInterval"`
@@ -37,6 +39,8 @@ func NewProvider(t Type) (ConfigurationProvider, error) {
 	switch t {
 	case JSON:
 		return NewJSONProvider(JsonFile), nil
+	case Consul:
+		return NewConsulProvider()
 	default:
 		return nil, errors.New("provider not defined")
 	}
@@ -60,4 +64,8 @@ func (c *Config) LoadRoutes(provider ConfigurationProvider) {
 
 func (c *Config) LoadNetwork(provider ConfigurationProvider) {
 	provider.LoadNetwork(c)
+}
+
+func (c *Config) LoadAll(provider ConfigurationProvider) {
+	provider.LoadAll(c)
 }
