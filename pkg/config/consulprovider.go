@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+// ConsulProvider is a provider which populates the configuration from a Consul Server.
 type ConsulProvider struct {
 	json   *JSONProvider
 	client api.Client
@@ -33,7 +34,7 @@ func (cp ConsulProvider) LoadAll(config *Config) {
 // we end up returning a JSON provider embedded, but this should be refactored accordingly.
 func NewConsulProvider() (cfg *JSONProvider, err error) {
 	c, err := api.NewClient(&api.Config{
-		Address: os.Getenv("CONSUL_SRV"),
+		Address: os.Getenv("CONSUL_ADDR"),
 	})
 	pair, _, err := c.KV().Get("PROXY_CONFIG", nil)
 	if err != nil {

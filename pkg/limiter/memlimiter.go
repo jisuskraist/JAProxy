@@ -12,6 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// MemLimiter implements a simple limiter storing the visitors in memory
 type MemLimiter struct {
 	ipLimit       rate.Limit
 	pathLimit     rate.Limit
@@ -53,6 +54,7 @@ func (m *MemLimiter) getLimiter(t Type, val string) *rate.Limiter {
 	return c.limiter
 }
 
+// Limit is a middleware which stops the request if rate is exceeded or continues down the chain.
 func (m *MemLimiter) Limit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-RateLimit-Limit", strconv.Itoa(int(m.ipLimit)))
@@ -72,6 +74,7 @@ func (m *MemLimiter) Limit(next http.Handler) http.Handler {
 	})
 }
 
+// CleanUp cleans the memory to avoid insane memory grow
 func (m *MemLimiter) CleanUp() {
 	for {
 		time.Sleep(m.sweepInterval * time.Second)
@@ -85,6 +88,11 @@ func (m *MemLimiter) CleanUp() {
 		}
 		m.l.Unlock()
 	}
+}
+
+// IsHealthy returns if the current memory limiter is healthy, how would i know?
+func (MemLimiter) IsHealthy() bool {
+	return true
 }
 
 func NewMemLimiter(cfg config.LimiterConfig) *MemLimiter {

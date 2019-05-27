@@ -8,7 +8,7 @@ import (
 )
 
 var RpsCounter *ratecounter.RateCounter
-
+//TODO: init should ve avoided ;)
 func init() {
 	RpsCounter = ratecounter.NewRateCounter(1 * time.Second)
 

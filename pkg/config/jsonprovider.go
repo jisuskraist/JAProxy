@@ -13,6 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// JSONProvider represents the configuration based on a JSON format.
 type JSONProvider struct {
 	Network struct {
 		Timeout               time.Duration `json:"timeout"`
@@ -56,14 +57,17 @@ func NewJSONProvider(path string) *JSONProvider {
 	return &config
 }
 
+// LoadCommon loads common configuration
 func (p JSONProvider) LoadCommon(config *Config) {
 	config.Port = p.Common.ListenPort
 }
 
+// LoadRouter loads the routes
 func (p JSONProvider) LoadRoutes(config *Config) {
 	config.Routes = p.Routes
 }
 
+// LoadNetwork loads the network configuration
 func (p JSONProvider) LoadNetwork(config *Config) {
 	transport := &http.Transport{
 		DialContext: (&net.Dialer{
