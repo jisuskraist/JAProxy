@@ -1,5 +1,7 @@
 # JAProxy
 Just Another Proxy it's a http proxy built in Go.
+## Requirements
+You should have dep installed because that's what we use to manage the dependencies, go mod maybe some day.
 ## Building
 The project features a Makefile with the following commands:
  - **build** builds the project binary of the running platform
@@ -13,3 +15,5 @@ _The build procedure is done inside a docker image, so naturally you'll need to 
  - Exposes metrics through Prometheus
 ## Known issues and follow up fixes :ghost:
  - Code should be cleaned up, unify the limiters behind one method to avoid duplicate code on rate limit handle(writing response, setting limits exceeded headers, etc)
+ - Currently we don't feature a circuit breaker so if a target is dead... good luck.
+ - Implement a key value Consul configuration instead of parsing a JSON... which is the same as using a JSON file for config, just remotely fetched :sweat_smile:

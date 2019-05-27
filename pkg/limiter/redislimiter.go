@@ -9,19 +9,17 @@ import (
 	"time"
 )
 
+// RedisLimiter represents a limiter storing the IP/Path in a redis database.
 type RedisLimiter struct {
 	ring    *redis.Ring
 	limiter *redis_rate.Limiter
-	cfg     redisConfig
+	cfg     config.LimiterConfig
 }
 
-type redisConfig struct {
-	config.LimiterConfig
-	Servers map[string]string
-}
-
+// Limit is a middleware which stops the request if rate is exceeded or continues down the chain.
 func (rl RedisLimiter) Limit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//TODO: implement filtering by path here
 		ip, _, _ := net.SplitHostPort(r.RemoteAddr)
 		rate, _, allowed := rl.limiter.Allow(ip, int64(rl.cfg.IpLimit), time.Second)
 		if !allowed {
@@ -35,13 +33,19 @@ func (rl RedisLimiter) Limit(next http.Handler) http.Handler {
 	})
 }
 
+// CleanUp just to satisfy the interface, the library used automatically cleans the Keys already free.
 func (RedisLimiter) CleanUp() {
 
 }
 
-func NewRedisLimiter(cfg redisConfig) *RedisLimiter {
+// IsHealthy pings the redis server to know if it's still responsive
+func (rl RedisLimiter) IsHealthy() bool {
+	return rl.ring.Ping().Err() != nil
+}
+
+func NewRedisLimiter(cfg config.LimiterConfig) *RedisLimiter {
 	r := redis.NewRing(&redis.RingOptions{
-		Addrs: cfg.Servers,
+		Addrs: cfg.RedisAddress,
 	})
 
 	return &RedisLimiter{

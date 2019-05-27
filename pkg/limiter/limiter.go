@@ -15,6 +15,7 @@ const (
 	URL
 )
 
+// Limiter types
 const (
 	InMemory = iota
 	Redis
@@ -25,21 +26,21 @@ type client struct {
 	lastSeen time.Time
 }
 
+// Interface defining the behaviour of a limiter
 type Limiter interface {
 	CleanUp()
+	IsHealthy() bool
 	Limit(next http.Handler) http.Handler
 }
 
+// NewLimiter returns a new limiter given the storage type
 func NewLimiter(s StorageType, cfg config.LimiterConfig) Limiter {
 	switch s {
 	case Redis:
-		servers := map[string]string{
-			"server1": "localhost:6379",
-		}
-		return NewRedisLimiter(redisConfig{cfg, servers})
+		return NewRedisLimiter(cfg)
 	case InMemory:
 		fallthrough
 	default:
 		return NewMemLimiter(cfg)
-}
+	}
 }

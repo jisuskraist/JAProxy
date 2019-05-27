@@ -46,7 +46,19 @@ func main() {
 	// HTTP server
 	handler := http.NewServeMux()
 	handler.Handle("/metrics", promhttp.Handler())
+	handler.HandleFunc("/health", func(rw http.ResponseWriter, req *http.Request) {
+		if l.IsHealthy() {
+			rw.WriteHeader(http.StatusOK)
+		} else {
+			rw.WriteHeader(http.StatusServiceUnavailable)
+		}
+
+	})
 	handler.HandleFunc("/", proxy.ServeHTTP)
 
-	http.ListenAndServe(":"+strconv.Itoa(conf.Port), l.Limit(handler))
+	err = http.ListenAndServe(":"+strconv.Itoa(conf.Port), l.Limit(handler))
+
+	if err != nil {
+		panic(err)
+	}
 }

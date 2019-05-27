@@ -2,6 +2,7 @@ package metrics
 
 import "github.com/prometheus/client_golang/prometheus"
 
+// Registry represents a metric registry.
 type Registry struct {
 	Histogram *prometheus.HistogramVec
 }
