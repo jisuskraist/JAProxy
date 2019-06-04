@@ -17,7 +17,10 @@
     "pathLimit": 200,
     "burst": 3000,
     "age": 30,
-    "sweepInterval": 180
+    "sweepInterval": 180,
+    "redisAddress": {
+      "server1": "proxyredis.zo1hrr.ng.0001.use2.cache.amazonaws.com:6379"
+    }
   },
   "routes": [
     {
