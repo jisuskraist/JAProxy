@@ -27,16 +27,6 @@ type ConfigurationProvider interface {
 	LoadAll(config *Config)
 }
 
-// LimiterConfig is the configuration to be used by all the limiters.
-type LimiterConfig struct {
-	IpLimit       int64             `json:"ipLimit"`
-	PathLimit     int64             `json:"pathLimit"`
-	Burst         int               `json:"burst"`
-	Age           time.Duration     `json:"age"`
-	SweepInterval time.Duration     `json:"sweepInterval"`
-	RedisAddress  map[string]string `json:"redisAddress"`
-}
-
 func NewProvider(t Type) (ConfigurationProvider, error) {
 	switch t {
 	case JSON:
@@ -54,6 +44,16 @@ type Config struct {
 	Routes  []balance.RouteMapping
 	Client  network.Client
 	Limiter LimiterConfig
+}
+
+// LimiterConfig is the configuration to be used by all the limiters.
+type LimiterConfig struct {
+	IpLimit       int64             `json:"ipLimit"`
+	PathLimit     int64             `json:"pathLimit"`
+	Burst         int               `json:"burst"`
+	Age           time.Duration     `json:"age"`
+	SweepInterval time.Duration     `json:"sweepInterval"`
+	RedisAddress  map[string]string `json:"redisAddress"`
 }
 
 func (c *Config) LoadCommon(provider ConfigurationProvider) {

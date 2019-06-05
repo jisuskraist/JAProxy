@@ -65,9 +65,7 @@ func (m *MemLimiter) Limit(next http.Handler) http.Handler {
 		pathl := m.getLimiter(URL, url)
 
 		if ipl.Allow() == false || pathl.Allow() == false {
-			http.Error(w, http.StatusText(429), http.StatusTooManyRequests)
-			log.Warn("Hit request limit")
-
+			http.Error(w, "API rate limit exceeded", http.StatusTooManyRequests)
 			return
 		}
 		next.ServeHTTP(w, r)
@@ -90,7 +88,8 @@ func (m *MemLimiter) CleanUp() {
 	}
 }
 
-// IsHealthy returns if the current memory limiter is healthy, how would i know?
+// IsHealthy returns if the current memory limiter is healthy
+// Unless we crashed memory should be alright, right? Guys...?
 func (MemLimiter) IsHealthy() bool {
 	return true
 }
