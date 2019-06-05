@@ -1,7 +1,6 @@
 package proxies
 
 import (
-	"fmt"
 	"github.com/jisuskraist/JAProxy/pkg/balance"
 	"github.com/jisuskraist/JAProxy/pkg/metrics"
 	"github.com/jisuskraist/JAProxy/pkg/network"
@@ -26,21 +25,18 @@ type HTTPProxy struct {
 }
 
 // Handles the request made to the web server.
-func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	start := time.Now()
-	mStatus := http.StatusOK
-
+func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) *network.AppError {
 	p.requestMiddleware(req)
 
 	targetURL, err := p.balancer.NextTarget(req.Host)
 	//TODO: this error handling should be delegated to an error handling middleware to avoid duped code
 	if err != nil {
 		log.Warn(err)
-		rw.WriteHeader(http.StatusBadGateway)
-		duration := time.Since(start)
-		p.registry.Histogram.WithLabelValues(fmt.Sprintf("%d", http.StatusInternalServerError)).Observe(duration.Seconds())
-		fmt.Fprint(rw, err)
-		return
+		return &network.AppError{
+			Message: "Could not find a target host",
+			Code:    http.StatusBadGateway,
+			Error:   err,
+		}
 	}
 	h, _, _ := net.SplitHostPort(req.RemoteAddr)
 	req.Header.Set("X-Forwarded-For", h)
@@ -51,11 +47,11 @@ func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	//If there was an error making the request, return 500 with err as body
 	if err != nil {
 		log.Error("An error occurred while sending request ", err)
-		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(rw, err)
-		duration := time.Since(start)
-		p.registry.Histogram.WithLabelValues(fmt.Sprintf("%d", http.StatusInternalServerError)).Observe(duration.Seconds())
-		return
+		return &network.AppError{
+			Message: "Could not reach target",
+			Code:    http.StatusInternalServerError,
+			Error:   err,
+		}
 	}
 	p.responseMiddleware(resp)
 	copyHeaders(rw.Header(), resp.Header, true)
@@ -80,19 +76,19 @@ func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		_, err = io.Copy(rw, resp.Body)
 		close(done) // Avoid leak
 		if err != nil {
-			log.Error("An error occurred while copying response from server %s", err.Error())
-			mStatus = http.StatusInternalServerError
-
+			return &network.AppError{
+				Message: "An error occurred while copying bodies",
+				Code:    http.StatusInternalServerError,
+				Error:   err,
+			}
 		}
 	}
 	//Close body to avoid leak and enable TCP connection reuse (in case of using golang net client)
 	err = resp.Body.Close()
 	if err != nil {
 		log.Error("An error occurred while closing the response body %s", err.Error())
-		mStatus = http.StatusInternalServerError
 	}
-	duration := time.Since(start)
-	p.registry.Histogram.WithLabelValues(fmt.Sprintf("%d", mStatus)).Observe(duration.Seconds())
+	return nil
 }
 
 // Overwrites the request data to acts on its behalf prior to send it to the target server

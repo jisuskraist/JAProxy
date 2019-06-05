@@ -5,6 +5,7 @@ import (
 	"github.com/jisuskraist/JAProxy/pkg/config"
 	"github.com/jisuskraist/JAProxy/pkg/limiter"
 	"github.com/jisuskraist/JAProxy/pkg/metrics"
+	"github.com/jisuskraist/JAProxy/pkg/network"
 	"github.com/jisuskraist/JAProxy/pkg/proxies"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -31,7 +32,7 @@ func main() {
 	log.Debugf("%+v\n", conf)
 	// Metrics
 	r := metrics.NewRegistry()
-	_ = prometheus.Register(r.Histogram)
+	_ = prometheus.Register(r.ProxyHist)
 	// Limiter
 	l := limiter.NewLimiter(limiter.Redis, conf.Limiter)
 	go l.CleanUp()
@@ -54,7 +55,11 @@ func main() {
 		}
 
 	})
-	handler.Handle("/", l.Limit(proxy))
+	handler.Handle("/", l.Limit(
+		network.RequestHandler{
+			M: r.ProxyHist,
+			H: proxy.ServeHTTP},
+	))
 
 	// Serving in HTTP, to serve HTTPS add certificates and spin up the server with them.
 	err = http.ListenAndServe(":"+strconv.Itoa(conf.Port), handler)
