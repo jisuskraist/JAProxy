@@ -31,7 +31,7 @@ func main() {
 	log.Debugf("%+v\n", conf)
 	// Metrics
 	r := metrics.NewRegistry()
-	prometheus.Register(r.Histogram)
+	_ = prometheus.Register(r.Histogram)
 	// Limiter
 	l := limiter.NewLimiter(limiter.Redis, conf.Limiter)
 	go l.CleanUp()
@@ -54,9 +54,9 @@ func main() {
 		}
 
 	})
-	handler.HandleFunc("/", proxy.ServeHTTP)
+	handler.Handle("/", l.Limit(proxy))
 
-	err = http.ListenAndServe(":"+strconv.Itoa(conf.Port), l.Limit(handler))
+	err = http.ListenAndServe(":"+strconv.Itoa(conf.Port), handler)
 
 	if err != nil {
 		panic(err)

@@ -6,7 +6,10 @@ import (
 	"github.com/jisuskraist/JAProxy/pkg/config"
 	"net"
 	"net/http"
+	"strconv"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // RedisLimiter represents a limiter storing the IP/Path in a redis database.
@@ -21,11 +24,10 @@ func (rl RedisLimiter) Limit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		//TODO: implement filtering by path here
 		ip, _, _ := net.SplitHostPort(r.RemoteAddr)
-		rate, _, allowed := rl.limiter.Allow(ip, int64(rl.cfg.IpLimit), time.Second)
+		_, _, allowed := rl.limiter.Allow(ip, int64(rl.cfg.IpLimit), time.Second)
 		if !allowed {
 			h := w.Header()
-			h.Set("X-RateLimit-Limit", string(rl.cfg.IpLimit))
-			h.Set("X-RageLimit-Remaining", string(rl.cfg.IpLimit-rate))
+			h.Set("X-RateLimit-Limit", strconv.Itoa(int(rl.cfg.IpLimit)))
 			http.Error(w, "API rate limit exceeded", http.StatusTooManyRequests)
 			return
 		}
@@ -40,7 +42,11 @@ func (RedisLimiter) CleanUp() {
 
 // IsHealthy pings the redis server to know if it's still responsive
 func (rl RedisLimiter) IsHealthy() bool {
-	return rl.ring.Ping().Err() != nil
+	res, err := rl.ring.Ping().Result()
+	if err != nil {
+		log.Error(res)
+	}
+	return err == nil
 }
 
 func NewRedisLimiter(cfg config.LimiterConfig) *RedisLimiter {
