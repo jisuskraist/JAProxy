@@ -21,4 +21,4 @@ _The build procedure is done inside a docker image, so naturally you'll need to 
  - Code should be cleaned up, unify the limiters behind one method to avoid duplicate code on rate limit handle(writing response, setting limits exceeded headers, etc)
  - Currently we don't feature a circuit breaker so if a target is dead... good luck.
  - Implement a key value Consul configuration instead of parsing a JSON... which is the same as using a JSON file for config, just remotely fetched :sweat_smile:
- - Current redis implementation doesn't support Elasticache cluster
+ - Current redis implementation doesn't support Elasticache cluster node autodiscovery through configuration endpoint.
