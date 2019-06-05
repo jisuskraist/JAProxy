@@ -82,6 +82,7 @@ func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			log.Error("An error occurred while copying response from server %s", err.Error())
 			mStatus = http.StatusInternalServerError
+
 		}
 	}
 	//Close body to avoid leak and enable TCP connection reuse (in case of using golang net client)

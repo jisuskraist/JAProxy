@@ -14,11 +14,7 @@ import (
 
 // MemLimiter implements a simple limiter storing the visitors in memory
 type MemLimiter struct {
-	ipLimit       rate.Limit
-	pathLimit     rate.Limit
-	burst         int
-	age           time.Duration
-	sweepInterval time.Duration
+	cfg           config.LimiterConfig
 	limiters      map[Type]map[string]*client
 	l             sync.Mutex
 }
@@ -29,9 +25,9 @@ func (m *MemLimiter) addLimiter(t Type, value string) *rate.Limiter {
 
 	switch t {
 	case IpAddress:
-		l = rate.NewLimiter(m.ipLimit, m.burst)
+		l = rate.NewLimiter(rate.Limit(m.cfg.IpLimit), m.cfg.Burst)
 	case URL:
-		l = rate.NewLimiter(m.pathLimit, m.burst)
+		l = rate.NewLimiter(rate.Limit(m.cfg.PathLimit), m.cfg.Burst)
 	}
 
 	m.l.Lock()
@@ -57,7 +53,7 @@ func (m *MemLimiter) getLimiter(t Type, val string) *rate.Limiter {
 // Limit is a middleware which stops the request if rate is exceeded or continues down the chain.
 func (m *MemLimiter) Limit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("X-RateLimit-Limit", strconv.Itoa(int(m.ipLimit)))
+		w.Header().Set("X-RateLimit-Limit", strconv.Itoa(int(m.cfg.IpLimit)))
 
 		ip, _, _ := net.SplitHostPort(r.RemoteAddr)
 		url := r.RequestURI
@@ -65,6 +61,7 @@ func (m *MemLimiter) Limit(next http.Handler) http.Handler {
 		pathl := m.getLimiter(URL, url)
 
 		if ipl.Allow() == false || pathl.Allow() == false {
+			w.Header().Set("X-RateLimit-Limit", strconv.Itoa(int(m.cfg.IpLimit)))
 			http.Error(w, "API rate limit exceeded", http.StatusTooManyRequests)
 			return
 		}
@@ -75,11 +72,11 @@ func (m *MemLimiter) Limit(next http.Handler) http.Handler {
 // CleanUp cleans the memory to avoid insane memory grow
 func (m *MemLimiter) CleanUp() {
 	for {
-		time.Sleep(m.sweepInterval * time.Second)
+		time.Sleep(m.cfg.SweepInterval * time.Second)
 		m.l.Lock()
 		for t, l := range m.limiters {
 			for val, cl := range l {
-				if time.Now().Sub(cl.lastSeen) > m.age*time.Second {
+				if time.Now().Sub(cl.lastSeen) > m.cfg.Age*time.Second {
 					delete(m.limiters[t], val)
 				}
 			}
@@ -96,11 +93,7 @@ func (MemLimiter) IsHealthy() bool {
 
 func NewMemLimiter(cfg config.LimiterConfig) *MemLimiter {
 	l := &MemLimiter{
-		rate.Limit(cfg.IpLimit),
-		rate.Limit(cfg.PathLimit),
-		cfg.Burst,
-		cfg.Age,
-		cfg.SweepInterval,
+		cfg,
 		make(map[Type]map[string]*client),
 		sync.Mutex{},
 	}
