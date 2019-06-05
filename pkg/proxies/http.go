@@ -27,9 +27,8 @@ type HTTPProxy struct {
 // Handles the request made to the web server.
 func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) *network.AppError {
 	p.requestMiddleware(req)
-
 	targetURL, err := p.balancer.NextTarget(req.Host)
-	//TODO: this error handling should be delegated to an error handling middleware to avoid duped code
+
 	if err != nil {
 		log.Warn(err)
 		return &network.AppError{
