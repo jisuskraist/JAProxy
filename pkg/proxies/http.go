@@ -7,6 +7,7 @@ import (
 	"github.com/jisuskraist/JAProxy/pkg/network"
 	log "github.com/sirupsen/logrus"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"time"
@@ -28,12 +29,11 @@ type HTTPProxy struct {
 func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	start := time.Now()
 	mStatus := http.StatusOK
-	metrics.RpsCounter.Incr(1)
 
 	p.requestMiddleware(req)
 
 	targetURL, err := p.balancer.NextTarget(req.Host)
-
+	//TODO: this error handling should be delegated to an error handling middleware to avoid duped code
 	if err != nil {
 		log.Warn(err)
 		rw.WriteHeader(http.StatusBadGateway)
@@ -42,7 +42,8 @@ func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		fmt.Fprint(rw, err)
 		return
 	}
-
+	h, _, _ := net.SplitHostPort(req.RemoteAddr)
+	req.Header.Set("X-Forwarded-For", h)
 	//Overwrite host, scheme and requestUri of proxied request
 	overwriteRequest(req, *targetURL)
 	//This could be synced to use less file descriptors if needed
@@ -62,13 +63,27 @@ func (p *HTTPProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	//Set status code and copy bodies
 	rw.WriteHeader(resp.StatusCode)
 	if resp.Body != nil {
+		//To support streams we flush a lot in a separate routine.
+		done := make(chan bool)
+		go func() {
+			for {
+				select {
+				case <-time.Tick(50 * time.Millisecond):
+					rw.(http.Flusher).Flush()
+				case <-done:
+					return
+				}
+			}
+		}()
+		//TODO: add support for trailers
+		//https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Trailer
 		_, err = io.Copy(rw, resp.Body)
+		close(done) // Avoid leak
 		if err != nil {
 			log.Error("An error occurred while copying response from server %s", err.Error())
 			mStatus = http.StatusInternalServerError
 		}
 	}
-
 	//Close body to avoid leak and enable TCP connection reuse (in case of using golang net client)
 	err = resp.Body.Close()
 	if err != nil {

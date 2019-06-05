@@ -35,7 +35,7 @@ func (rl RedisLimiter) Limit(next http.Handler) http.Handler {
 	})
 }
 
-// CleanUp just to satisfy the interface, the library used automatically cleans the Keys already free.
+// CleanUp just to satisfy the interface, the library used automatically cleans the Keys already expired.
 func (RedisLimiter) CleanUp() {
 
 }

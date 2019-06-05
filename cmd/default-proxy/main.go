@@ -56,6 +56,7 @@ func main() {
 	})
 	handler.Handle("/", l.Limit(proxy))
 
+	// Serving in HTTP, to serve HTTPS add certificates and spin up the server with them.
 	err = http.ListenAndServe(":"+strconv.Itoa(conf.Port), handler)
 
 	if err != nil {

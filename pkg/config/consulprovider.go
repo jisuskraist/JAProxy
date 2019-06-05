@@ -36,6 +36,9 @@ func NewConsulProvider() (cfg *JSONProvider, err error) {
 	c, err := api.NewClient(&api.Config{
 		Address: os.Getenv("CONSUL_ADDR"),
 	})
+	if err != nil {
+		return
+	}
 	pair, _, err := c.KV().Get("PROXY_CONFIG", nil)
 	if err != nil {
 		return
